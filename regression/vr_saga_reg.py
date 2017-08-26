@@ -1,12 +1,13 @@
-import numpy
+import numpy as np
 import math
 from random import choice
 from loss_function import squared_loss
 
 from sklearn.base import BaseEstimator, RegressorMixin
 
+
 class saga_estimator(BaseEstimator, RegressorMixin):
-    def __init__(self, dim, round = 1, step_size = 0.1, temp = 1.0):
+    def __init__(self, dim, round=1, step_size=0.1, temp=1.0):
         self.round = round
         self.step_size = step_size
         self.samples = []
@@ -22,20 +23,20 @@ class saga_estimator(BaseEstimator, RegressorMixin):
         D = self.temp
 
         samples = self.samples
-        theta = numpy.random.multivariate_normal(numpy.zeros(d), numpy.identity(d))
+        theta = np.random.multivariate_normal(np.zeros(d), np.identity(d))
         samples.append(theta)
 
         moments = []
-        p = numpy.random.multivariate_normal(numpy.zeros(d), numpy.identity(d))
+        p = np.random.multivariate_normal(np.zeros(d), np.identity(d))
         moments.append(p)
 
         alpha = []
         for i in range(n):
             alpha.append(theta)
 
-        g = numpy.zeros(d)
+        g = np.zeros(d)
         for i in range(n):
-            g = g - (y_train[i] - numpy.dot(alpha[i], X_train[i, :])) * X_train[i, :]
+            g = g - (y_train[i] - np.dot(alpha[i], X_train[i, :])) * X_train[i, :]
 
         print('Total number of iters: ', T)
         for t in range(T):
@@ -48,14 +49,14 @@ class saga_estimator(BaseEstimator, RegressorMixin):
             I = []
             for i in range(b):
                 I.append(choice(range(n)))
-            tmp = numpy.zeros(d)
+            tmp = np.zeros(d)
             for i in I:
-                tmp = tmp + (numpy.dot(theta, X_train[i, :]) - y_train[i]) * X_train[i, :] \
-                        - (numpy.dot(alpha[i], X_train[i, :]) - y_train[i]) * X_train[i, :]
+                tmp = tmp + (np.dot(theta, X_train[i, :]) - y_train[i]) * X_train[i, :] \
+                      - (np.dot(alpha[i], X_train[i, :]) - y_train[i]) * X_train[i, :]
             nabla = theta + float(n) / float(b) * tmp + g
 
-            p_next = (1 - D*h) * p - h * nabla + math.sqrt(2*D*h) \
-                        * numpy.random.multivariate_normal(numpy.zeros(d), numpy.identity(d))
+            p_next = (1 - D * h) * p - h * nabla + math.sqrt(2 * D * h) \
+                                                   * np.random.multivariate_normal(np.zeros(d), np.identity(d))
             theta_next = theta + h * p_next
             samples.append(theta_next)
             moments.append(p_next)
@@ -69,24 +70,30 @@ class saga_estimator(BaseEstimator, RegressorMixin):
     def score(self, X, y):
         sum = 0.
         n = len(y)
+        dn = 1.0 / n
         for i in range(n):
-            sum = sum + squared_loss(self.predict(X[i, :]), y[i])
-        return -sum / n
+            sum += (squared_loss(self.predict(X[i, :]), y[i]) * dn)
+        return -sum  # / n
 
     def predict(self, x):
         n = len(self.samples)
+        dn = 1.0 / n
         if n is 0:
             return 0.
 
         pred = 0.
         for theta in self.samples:
-            pred = pred + numpy.dot(x, theta)
-        pred = pred / n
+            pred += (np.dot(x, theta) * dn)
+        # pred = pred / n
         return pred
 
     def fit2plot(self, X_train, X_test, y_train, y_test):
         self.samples = []
         mse = []
+        lenTest = len(y_test)
+        emp_pred_val = np.zeros(lenTest)
+        realmse = 0
+        empsum = 0
 
         d = self.dim
         b = 10
@@ -96,24 +103,24 @@ class saga_estimator(BaseEstimator, RegressorMixin):
         D = self.temp
 
         samples = self.samples
-        theta = numpy.random.multivariate_normal(numpy.zeros(d), numpy.identity(d))
+        theta = np.random.multivariate_normal(np.zeros(d), np.identity(d))
         samples.append(theta)
 
         moments = []
-        p = numpy.random.multivariate_normal(numpy.zeros(d), numpy.identity(d))
+        p = np.random.multivariate_normal(np.zeros(d), np.identity(d))
         moments.append(p)
 
         alpha = []
         for i in range(n):
             alpha.append(theta)
 
-        g = numpy.zeros(d)
+        g = np.zeros(d)
         for i in range(n):
-            g = g - (y_train[i] - numpy.dot(alpha[i], X_train[i, :])) * X_train[i, :]
+            g = g - (y_train[i] - np.dot(alpha[i], X_train[i, :])) * X_train[i, :]
 
         print('Plot total number of iters: ', T)
         for t in range(T):
-            if t % 100 is 0:
+            if t % 1000 is 0:
                 print('Plot iter: ', t)
 
             theta = samples[t]
@@ -122,14 +129,14 @@ class saga_estimator(BaseEstimator, RegressorMixin):
             I = []
             for i in range(b):
                 I.append(choice(range(n)))
-            tmp = numpy.zeros(d)
+            tmp = np.zeros(d)
             for i in I:
-                tmp = tmp + (numpy.dot(theta, X_train[i, :]) - y_train[i]) * X_train[i, :] \
-                        - (numpy.dot(alpha[i], X_train[i, :]) - y_train[i]) * X_train[i, :]
+                tmp = tmp + (np.dot(theta, X_train[i, :]) - y_train[i]) * X_train[i, :] \
+                      - (np.dot(alpha[i], X_train[i, :]) - y_train[i]) * X_train[i, :]
             nabla = theta + float(n) / float(b) * tmp + g
 
-            p_next = (1 - D*h) * p - h * nabla + math.sqrt(2*D*h) \
-                        * numpy.random.multivariate_normal(numpy.zeros(d), numpy.identity(d))
+            p_next = (1 - D * h) * p - h * nabla + math.sqrt(2 * D * h) \
+                                                   * np.random.multivariate_normal(np.zeros(d), np.identity(d))
             theta_next = theta + h * p_next
             samples.append(theta_next)
             moments.append(p_next)
@@ -139,7 +146,18 @@ class saga_estimator(BaseEstimator, RegressorMixin):
             g = g + tmp
 
             if t % 10 is 0:
-                err = - self.score(X_test, y_test)
+                thetahere = samples[-10:]
+                lengap = len(thetahere)
+                for i in range(lenTest):
+                    for j in range(lengap):
+                        emp_pred_val[i] += np.dot(X_test[i, :], thetahere[j])
+                realmse += 1
+                empsum += lengap
+                emp_avg_val = emp_pred_val / empsum
+                err = 0.0
+                for i in range(lenTest):
+                    err += squared_loss(emp_avg_val[i], y_test[i])
+                err /= lenTest
                 mse.append(err)
 
         return mse
