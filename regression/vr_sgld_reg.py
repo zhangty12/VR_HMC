@@ -62,24 +62,24 @@ class sgld_estimator(BaseEstimator, RegressorMixin):
     def score(self, X, y):
         sum = 0.
         n = len(y)
-        dn = 1.0 / n
+        # dn = 1.0 / n
         for i in range(n):
-            sum += (squared_loss(self.predict(X[i, :]), y[i]) * dn)
-        return -sum  # / n
+            sum += squared_loss(self.predict(X[i, :]), y[i])
+        return -sum / n
 
     def predict(self, x):
         n = len(self.samples)
-        dn = 1.0 / n
+        # dn = 1.0 / n
         if n is 0:
             return 0.
 
         pred = 0.
         for theta in self.samples:
-            pred += (np.dot(x, theta) * dn)
-        # pred = pred / n
+            pred += np.dot(x, theta)
+        pred = pred / n
         return pred
 
-    def fit2plot(self, X_train, X_test, y_train, y_test):
+    def fit2plot(self, X_train, X_test, y_train, y_test, ini_theta):
         self.samples = []
         mse = []
         lenTest = len(y_test)
@@ -95,7 +95,7 @@ class sgld_estimator(BaseEstimator, RegressorMixin):
         K = n / b
 
         samples = self.samples
-        theta = np.random.multivariate_normal(np.zeros(d), np.identity(d))
+        theta = ini_theta
         samples.append(theta)
 
         g = np.zeros(d)
@@ -128,10 +128,11 @@ class sgld_estimator(BaseEstimator, RegressorMixin):
 
             theta_next = theta - h * nabla \
                          + math.sqrt(2 * h) * np.random.multivariate_normal(np.zeros(d), np.identity(d))
-            samples.append(theta_next)
 
-            if t % 10 is 0:
-                thetahere = samples[-10:]
+
+            gap = 10
+            if t % gap is 0:
+                thetahere = samples[-gap:]
                 lengap = len(thetahere)
                 for i in range(lenTest):
                     for j in range(lengap):
@@ -144,5 +145,7 @@ class sgld_estimator(BaseEstimator, RegressorMixin):
                     err += squared_loss(emp_avg_val[i], y_test[i])
                 err /= lenTest
                 mse.append(err)
+
+            samples.append(theta_next)
 
         return mse

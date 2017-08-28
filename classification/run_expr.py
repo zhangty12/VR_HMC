@@ -9,15 +9,15 @@ from vr_sgld_reg import sgld_estimator
 from vr_sald_reg import sald_estimator
 
 
-def run_expr(initiate, size=0):
+def run_expr(initiate, rnd=3, cv=3, size=0):
     name, dim, X, y, saga_params, svrg_params, sgld_params, sald_params = initiate.data_params()
     X_tv, X_test, y_tv, y_test = train_test_split(X, y, test_size=1.0 / 5, random_state=10)
 
     if size != 0:
         X_train, X_va, y_train, y_va = train_test_split(X_tv, y_tv, test_size=1.0 / 8, random_state=10)
 
-    rnd = 3
-    cv = 3
+    # rnd = 3
+    # cv = 3
     lenTrain = len(y_tv)
 
     saga = saga_estimator(dim=dim, round=rnd)
@@ -59,11 +59,11 @@ def run_expr(initiate, size=0):
     times = [10.0 / lenTrain * i for i in range(lenT)]
     # times = [i / lenTrain  for i in range(lenT)]
 
-    plt.semilogy(times, saga_plot, 'r-', label='SAGA')
-    plt.semilogy(times, svrg_plot, 'b-', label='SVRG')
-    plt.semilogy(times, sgld_plot, 'g-', label='SGLD')
-    plt.semilogy(times, sald_plot, 'y-', label='SALD')
+    plt.plot(times, saga_plot, 'r-', label='SAGA')
+    plt.plot(times, svrg_plot, 'b-', label='SVRG')
+    plt.plot(times, sgld_plot, 'g-', label='SGLD')
+    plt.plot(times, sald_plot, 'y-', label='SALD')
 
     plt.legend()
-    plt.savefig(name + '/mse_' + name.split('/')[1] + '.png')
+    plt.savefig(name + '/loglh_' + name.split('/')[1] + '.png')
     plt.show()

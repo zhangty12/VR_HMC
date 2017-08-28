@@ -1,12 +1,13 @@
 import numpy as np
 import math
 from random import choice
-from loss_function import squared_loss
-
 from sklearn.base import BaseEstimator, RegressorMixin
 
+from loss_function import loglh
+from phi import sigmoid
 
-class sald_estimator(BaseEstimator, RegressorMixin):
+
+class sgld_estimator(BaseEstimator, RegressorMixin):
     def __init__(self, dim, round=1, step_size=0.1):
         self.round = round
         self.step_size = step_size
@@ -19,42 +20,43 @@ class sald_estimator(BaseEstimator, RegressorMixin):
         n = len(y_train)
         T = n * self.round
         h = self.step_size
+        K = n / b
 
         samples = self.samples
         theta = np.random.multivariate_normal(np.zeros(d), np.identity(d))
         samples.append(theta)
 
-        alpha = []
-        for i in range(n):
-            alpha.append(theta)
-
         g = np.zeros(d)
-        for i in range(n):
-            g = g - (y_train[i] - np.dot(alpha[i], X_train[i, :])) * X_train[i, :]
+        w = np.zeros(d)
 
         print('Total number of iters: ', T)
         for t in range(T):
             if t % 1000 is 0:
-                print('Iter: ', t)
+                print('Iter ', t)
 
             theta = samples[t]
+            if t % K == 0:
+                tmp = np.zeros(d)
+                for i in range(n):
+                    x = X_train[i, :]
+                    y = y_train[i]
+                    tmp = tmp + (sigmoid(np.dot(theta, x)) - y) * x
+                g = theta + tmp
+                w = theta
 
             I = []
             for i in range(b):
                 I.append(choice(range(n)))
+
             tmp = np.zeros(d)
             for i in I:
-                tmp = tmp + (np.dot(theta, X_train[i, :]) - y_train[i]) * X_train[i, :] \
-                      - (np.dot(alpha[i], X_train[i, :]) - y_train[i]) * X_train[i, :]
+                tmp = tmp + (sigmoid(np.dot(theta, X_train[i, :])) - y_train[i]) * X_train[i, :] \
+                      - (sigmoid(np.dot(w, X_train[i, :])) - y_train[i]) * X_train[i, :]
             nabla = theta + float(n) / float(b) * tmp + g
 
             theta_next = theta - h * nabla \
                          + math.sqrt(2 * h) * np.random.multivariate_normal(np.zeros(d), np.identity(d))
             samples.append(theta_next)
-
-            for i in I:
-                alpha[i] = theta
-            g = g + tmp
 
         return self
 
@@ -63,8 +65,9 @@ class sald_estimator(BaseEstimator, RegressorMixin):
         n = len(y)
         # dn = 1.0 / n
         for i in range(n):
-            sum += squared_loss(self.predict(X[i, :]), y[i])
-        return -sum / n
+            sum += loglh(self.predict(X[i, :]), y[i])
+
+        return sum / n
 
     def predict(self, x):
         n = len(self.samples)
@@ -74,7 +77,7 @@ class sald_estimator(BaseEstimator, RegressorMixin):
 
         pred = 0.
         for theta in self.samples:
-            pred += np.dot(x, theta)
+            pred += sigmoid(np.dot(x, theta))
         pred = pred / n
         return pred
 
@@ -83,7 +86,7 @@ class sald_estimator(BaseEstimator, RegressorMixin):
         mse = []
         lenTest = len(y_test)
         emp_pred_val = np.zeros(lenTest)
-        realmse = 0
+        realloglh = 0
         empsum = 0
 
         d = self.dim
@@ -91,42 +94,43 @@ class sald_estimator(BaseEstimator, RegressorMixin):
         n = len(y_train)
         T = n * self.round
         h = self.step_size
+        K = n / b
 
         samples = self.samples
         theta = ini_theta
         samples.append(theta)
 
-        alpha = []
-        for i in range(n):
-            alpha.append(theta)
-
         g = np.zeros(d)
-        for i in range(n):
-            g = g - (y_train[i] - np.dot(alpha[i], X_train[i, :])) * X_train[i, :]
+        w = np.zeros(d)
 
         print('Plot total number of iters: ', T)
         for t in range(T):
             if t % 1000 is 0:
-                print('Plot iter: ', t)
+                print('Plot iter ', t)
 
             theta = samples[t]
+            if t % K == 0:
+                tmp = np.zeros(d)
+                for i in range(n):
+                    x = X_train[i, :]
+                    y = y_train[i]
+                    tmp = tmp + (sigmoid(np.dot(theta, x)) - y) * x
+                g = theta + tmp
+                w = theta
 
             I = []
             for i in range(b):
                 I.append(choice(range(n)))
+
             tmp = np.zeros(d)
             for i in I:
-                tmp = tmp + (np.dot(theta, X_train[i, :]) - y_train[i]) * X_train[i, :] \
-                      - (np.dot(alpha[i], X_train[i, :]) - y_train[i]) * X_train[i, :]
+                tmp = tmp + (sigmoid(np.dot(theta, X_train[i, :])) - y_train[i]) * X_train[i, :] \
+                      - (sigmoid(np.dot(w, X_train[i, :])) - y_train[i]) * X_train[i, :]
             nabla = theta + float(n) / float(b) * tmp + g
 
             theta_next = theta - h * nabla \
                          + math.sqrt(2 * h) * np.random.multivariate_normal(np.zeros(d), np.identity(d))
 
-
-            for i in I:
-                alpha[i] = theta
-            g = g + tmp
 
             gap = 10
             if t % gap is 0:
@@ -134,13 +138,13 @@ class sald_estimator(BaseEstimator, RegressorMixin):
                 lengap = len(thetahere)
                 for i in range(lenTest):
                     for j in range(lengap):
-                        emp_pred_val[i] += np.dot(X_test[i, :], thetahere[j])
-                realmse += 1
+                        emp_pred_val[i] += sigmoid(np.dot(X_test[i, :], thetahere[j]))
+                realloglh += 1
                 empsum += lengap
                 emp_avg_val = emp_pred_val / empsum
                 err = 0.0
                 for i in range(lenTest):
-                    err += squared_loss(emp_avg_val[i], y_test[i])
+                    err += loglh(emp_avg_val[i], y_test[i])
                 err /= lenTest
                 mse.append(err)
 

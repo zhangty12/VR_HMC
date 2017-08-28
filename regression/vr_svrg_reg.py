@@ -70,28 +70,28 @@ class svrg_estimator(BaseEstimator, RegressorMixin):
     def score(self, X, y):
         sum = 0.
         n = len(y)
-        dn = 1.0 / n
+        # dn = 1.0 / n
         for i in range(n):
-            sum += (squared_loss(self.predict(X[i, :]), y[i]) * dn)
-        return -sum  # / n
+            sum += squared_loss(self.predict(X[i, :]), y[i])
+        return -sum / n
 
     def predict(self, x):
         n = len(self.samples)
-        dn = 1.0 / n
+        # dn = 1.0 / n
         if n is 0:
             return 0.
 
         pred = 0.
         for theta in self.samples:
-            pred += (np.dot(x, theta) * dn)
-        # pred = pred / n
+            pred += np.dot(x, theta)
+        pred = pred / n
         return pred
 
-    def fit2plot(self, X_train, X_test, y_train, y_test):
+    def fit2plot(self, X_train, X_test, y_train, y_test, ini_theta):
         self.samples = []
         mse = []
         lenTest = len(y_test)
-        emp_avg_val = np.zeros(lenTest)
+        emp_pred_val = np.zeros(lenTest)
         realmse = 0
         empsum = 0
 
@@ -105,7 +105,7 @@ class svrg_estimator(BaseEstimator, RegressorMixin):
         # print('svrg, step-size=:'+str(h)+' tmp='+str(D))
 
         samples = self.samples
-        theta = np.random.multivariate_normal(np.zeros(d), np.identity(d))
+        theta = ini_theta
         samples.append(theta)
 
         moments = []
@@ -143,8 +143,31 @@ class svrg_estimator(BaseEstimator, RegressorMixin):
             p_next = (1 - D * h) * moments[t] - h * nabla + math.sqrt(2 * D * h) \
                                                             * np.random.multivariate_normal(np.zeros(d), np.identity(d))
             theta_next = samples[t] + h * p_next
+
+
+            gap = 10
+            if t % gap is 0:
+                thetahere = samples[-gap:]
+                lengap = len(thetahere)
+                for i in range(lenTest):
+                    for j in range(lengap):
+                        emp_pred_val[i] += np.dot(X_test[i, :], thetahere[j])
+                realmse += 1
+                empsum += lengap
+                emp_avg_val = emp_pred_val / empsum
+                err = 0.0
+                for i in range(lenTest):
+                    err += squared_loss(emp_avg_val[i], y_test[i])
+                err /= lenTest
+                mse.append(err)
+
             samples.append(theta_next)
             moments.append(p_next)
+
+        return mse
+
+
+'''           
             gap = 10
             if t % gap is 0:
                 thetahere = samples[-gap:]
@@ -167,5 +190,4 @@ class svrg_estimator(BaseEstimator, RegressorMixin):
                 # err /= lenTest
                 mse.append(err)
                 print(t, err)
-
-        return mse
+'''
