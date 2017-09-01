@@ -21,8 +21,12 @@ def data_params():
                    'temp': [3]}
     svrg_params = {'step_size': [0.01], \
                    'temp': [3]}
-    sgld_params = {'step_size': [0.0005]}
-    sald_params = {'step_size': [0.0005]}
+    sgld_params = {'step_size': [0.0001]}
+    sald_params = {'step_size': [0.0001]}
+    svrg2nd_params = {'step_size': [0.02], \
+                      'temp': [3]}
+    saga2nd_params = {'step_size': [0.02], \
+                      'temp': [3]}
 
-    return 'data/1pima', len(X[0]), X_normed, y, \
-           saga_params, svrg_params, sgld_params, sald_params
+    return 'data/1pima', len(X[0]), X_normed, y, saga_params, svrg_params, \
+           sgld_params, sald_params, svrg2nd_params, saga2nd_params

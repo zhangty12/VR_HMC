@@ -28,10 +28,10 @@ class sgld_estimator(BaseEstimator, RegressorMixin):
         g = np.zeros(d)
         w = np.zeros(d)
 
-        print('Total number of iters: ', T)
+        # print('Total number of iters: ', T)
         for t in range(T):
-            if t % 1000 is 0:
-                print('Iter ', t)
+            # if t % 1000 is 0:
+            #     print('Iter ', t)
 
             theta = samples[t]
             if t % K == 0:
@@ -101,10 +101,10 @@ class sgld_estimator(BaseEstimator, RegressorMixin):
         g = np.zeros(d)
         w = np.zeros(d)
 
-        print('Plot total number of iters: ', T)
+        # print('Plot total number of iters: ', T)
         for t in range(T):
-            if t % 1000 is 0:
-                print('Plot iter ', t)
+            # if t % 1000 is 0:
+            #     print('Plot iter ', t)
 
             theta = samples[t]
             if t % K == 0:

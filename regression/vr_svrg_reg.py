@@ -12,6 +12,7 @@ class svrg_estimator(BaseEstimator, RegressorMixin):
         self.step_size = step_size
         self.samples = []
         self.dim = dim
+        self.temp = temp
 
     def fit(self, X_train, y_train):
         d = self.dim
@@ -34,10 +35,10 @@ class svrg_estimator(BaseEstimator, RegressorMixin):
         g = np.zeros(d)
         w = np.zeros(d)
 
-        print('Total number of iters: ', T)
+        # print('Total number of iters: ', T)
         for t in range(T):
-            if t % 1000 is 0:
-                print('Iter ', t)
+            # if t % 1000 is 0:
+            #     print('Iter ', t)
 
             theta = samples[t]
             if t % K == 0:
@@ -115,10 +116,10 @@ class svrg_estimator(BaseEstimator, RegressorMixin):
         g = np.zeros(d)
         w = np.zeros(d)
 
-        print('Plot total number of iters: ', T)
+        # print('Plot total number of iters: ', T)
         for t in range(T):
-            if t % 1000 is 0:
-                print('Plot iter: ', t)
+            # if t % 1000 is 0:
+            #     print('Plot iter: ', t)
 
             theta = samples[t]
             if t % K == 0:
@@ -143,7 +144,6 @@ class svrg_estimator(BaseEstimator, RegressorMixin):
             p_next = (1 - D * h) * moments[t] - h * nabla + math.sqrt(2 * D * h) \
                                                             * np.random.multivariate_normal(np.zeros(d), np.identity(d))
             theta_next = samples[t] + h * p_next
-
 
             gap = 10
             if t % gap is 0:

@@ -7,7 +7,7 @@ from loss_function import loglh
 from phi import sigmoid
 
 
-class svrg_estimator(BaseEstimator, RegressorMixin):
+class svrg2nd_estimator(BaseEstimator, RegressorMixin):
     def __init__(self, dim, round=1, step_size=0.1, temp=1.0):
         self.round = round
         self.step_size = step_size
@@ -23,6 +23,7 @@ class svrg_estimator(BaseEstimator, RegressorMixin):
         h = self.step_size
         D = self.temp
         K = n / b
+        es = np.exp(-D * h / 2)  # 2nd
 
         samples = self.samples
         theta = np.random.multivariate_normal(np.zeros(d), np.identity(d))
@@ -55,15 +56,21 @@ class svrg_estimator(BaseEstimator, RegressorMixin):
             for i in range(b):
                 I.append(choice(range(n)))
 
+            theta = samples[t]
+            p = moments[t]
+            theta_tmp = theta + p * h / 2
+            p_tmp = es * p
             tmp = np.zeros(d)
             for i in I:
                 tmp = tmp + (sigmoid(np.dot(theta, X_train[i, :])) - y_train[i]) * X_train[i, :] \
                       - (sigmoid(np.dot(w, X_train[i, :])) - y_train[i]) * X_train[i, :]
-            nabla = theta + float(n) / float(b) * tmp + g
+            nabla = theta_tmp + float(n) / float(b) * tmp + g
+            p_tmp2 = p_tmp - h * nabla + math.sqrt(2 * D * h) \
+                                         * np.random.multivariate_normal(np.zeros(d), np.identity(d))
+            p_next = es * p_tmp2
 
-            p_next = (1 - D * h) * moments[t] - h * nabla + math.sqrt(2 * D * h) \
-                                                            * np.random.multivariate_normal(np.zeros(d), np.identity(d))
-            theta_next = samples[t] + h * p_next
+            theta_next = theta_tmp + h * p_next / 2
+
             samples.append(theta_next)
             moments.append(p_next)
         # print('score='+ str(self.score(X_train, y_train)))
@@ -105,6 +112,7 @@ class svrg_estimator(BaseEstimator, RegressorMixin):
         h = self.step_size
         D = self.temp
         K = n / b
+        es = np.exp(-D * h / 2)  # 2nd
         # print('svrg, step-size=:'+str(h)+' tmp='+str(D))
 
         samples = self.samples
@@ -137,15 +145,20 @@ class svrg_estimator(BaseEstimator, RegressorMixin):
             for i in range(b):
                 I.append(choice(range(n)))
 
+            theta = samples[t]
+            p = moments[t]
+            theta_tmp = theta + p * h / 2
+            p_tmp = es * p
             tmp = np.zeros(d)
             for i in I:
                 tmp = tmp + (sigmoid(np.dot(theta, X_train[i, :])) - y_train[i]) * X_train[i, :] \
                       - (sigmoid(np.dot(w, X_train[i, :])) - y_train[i]) * X_train[i, :]
-            nabla = theta + float(n) / float(b) * tmp + g
+            nabla = theta_tmp + float(n) / float(b) * tmp + g
+            p_tmp2 = p_tmp - h * nabla + math.sqrt(2 * D * h) \
+                                         * np.random.multivariate_normal(np.zeros(d), np.identity(d))
+            p_next = es * p_tmp2
 
-            p_next = (1 - D * h) * moments[t] - h * nabla + math.sqrt(2 * D * h) \
-                                                            * np.random.multivariate_normal(np.zeros(d), np.identity(d))
-            theta_next = samples[t] + h * p_next
+            theta_next = theta_tmp + h * p_next / 2
 
             gap = 10
             if t % gap is 0:

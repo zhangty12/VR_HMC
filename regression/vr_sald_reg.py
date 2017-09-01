@@ -32,10 +32,10 @@ class sald_estimator(BaseEstimator, RegressorMixin):
         for i in range(n):
             g = g - (y_train[i] - np.dot(alpha[i], X_train[i, :])) * X_train[i, :]
 
-        print('Total number of iters: ', T)
+        # print('Total number of iters: ', T)
         for t in range(T):
-            if t % 1000 is 0:
-                print('Iter: ', t)
+            # if t % 1000 is 0:
+            #     print('Iter: ', t)
 
             theta = samples[t]
 
@@ -104,10 +104,10 @@ class sald_estimator(BaseEstimator, RegressorMixin):
         for i in range(n):
             g = g - (y_train[i] - np.dot(alpha[i], X_train[i, :])) * X_train[i, :]
 
-        print('Plot total number of iters: ', T)
+        # print('Plot total number of iters: ', T)
         for t in range(T):
-            if t % 1000 is 0:
-                print('Plot iter: ', t)
+            # if t % 1000 is 0:
+            #     print('Plot iter: ', t)
 
             theta = samples[t]
 
