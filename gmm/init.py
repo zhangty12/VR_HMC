@@ -22,7 +22,7 @@ def data_params():
     saga_params = {'step_size': [0.01], \
                    'temp': [3]}
     svrg_params = {'step_size': [0.01], \
-                   'temp': [500]}
+                   'temp': [100]}
     sgld_params = {'step_size': [0.0005]}
     sald_params = {'step_size': [0.0005]}
 
