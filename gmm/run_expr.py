@@ -54,23 +54,23 @@ def run_expr(initiate, rnd=3, cv=3, size=0):
 
     # plot
 
-    sigma = 5
-    gamma = 20
-    prob = 1.0 / 2
-    mu = np.arange(-50, 55, 0.01)
-    y = np.zeros(len(mu))
-    n = len(X)
-    for i in range(n):
-        y += np.log(prob / (sigma * np.sqrt(2 * np.pi)) * (
-        np.exp(-(mu - X[i]) ** 2 / (2 * (sigma ** 2))) + np.exp(-(mu - (-X[i] + gamma)) ** 2 / (2 * (sigma ** 2)))))
-    y += (np.log(1 / np.sqrt(2 * np.pi)) - (mu ** 2) / 2)
-    plt.figure(1)
-    plt.xlabel(r'$\mu$')
-    plt.ylabel('Log-posterior')
-    plt.title('Posterior')
-    plt.plot(mu, y, 'r-')
-    # plt.legend()
-    plt.savefig(name + '_post' + '.png')
+    # sigma = 5
+    # gamma = 20
+    # prob = 1.0 / 2
+    # mu = np.arange(-50, 55, 0.01)
+    # y = np.zeros(len(mu))
+    # n = len(X)
+    # for i in range(n):
+    #     y += np.log(prob / (sigma * np.sqrt(2 * np.pi)) * (
+    #     np.exp(-(mu - X[i]) ** 2 / (2 * (sigma ** 2))) + np.exp(-(mu - (-X[i] + gamma)) ** 2 / (2 * (sigma ** 2)))))
+    # y += (np.log(1 / np.sqrt(2 * np.pi)) - (mu ** 2) / 2)
+    # plt.figure(1)
+    # plt.xlabel(r'$\mu$')
+    # plt.ylabel('Log-posterior')
+    # plt.title('Posterior')
+    # plt.plot(mu, y, 'r-')
+    # # plt.legend()
+    # plt.savefig(name + '_post' + '.png')
 
     # plt.figure(2)
     # plt.xlabel(r'$\mu$')
