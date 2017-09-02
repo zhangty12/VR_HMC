@@ -69,7 +69,6 @@ def run_expr(initiate, rnd=3, cv=3, size=0):
     svrg2nd_plot = cv_svrg2nd.best_estimator_.fit2plot(X_tv, X_test, y_tv, y_test, ini_theta)
     saga2nd_plot = cv_saga2nd.best_estimator_.fit2plot(X_tv, X_test, y_tv, y_test, ini_theta)
 
-    plt.figure(1)
     plt.ylabel('Test MSE')
     plt.xlabel('Number of pass through data')
     lenT = len(svrg_plot)
@@ -87,9 +86,7 @@ def run_expr(initiate, rnd=3, cv=3, size=0):
 
     plots = np.row_stack((ts, saga_plots, svrg_plots,
                           sgld_plots, sald_plots, svrg2nd_plots, saga2nd_plots))
-    print(plots.shape)
     plotdf = pd.DataFrame(plots)
-    print(plotdf.shape)
     fileplot = name + '/plotdata_' + name.split('/')[1] + '.csv'
     plotdf.to_csv(fileplot, encoding='utf-8', index=False)
 
