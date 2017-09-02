@@ -28,7 +28,7 @@ def data_params():
     sald_params = {'step_size': [0.0005, 0.0001]}
     svrg2nd_params = {'step_size': [0.01, 0.001, 0.005], \
                    'temp': [1, 3, 5]}
-    saga2nd_params = {'step_size': [0.01, 0.001, 0.005], \
+    saga2nd_params = {'step_size': [0.001, 0.005], \
                    'temp': [1, 3, 5]}
 
     return 'data/1concrete', len(X[0]), X_normed, y, saga_params, svrg_params, \
